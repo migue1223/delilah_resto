@@ -1,5 +1,28 @@
 const connection = require("./mysql");
 
+async function list(table) {
+  return new Promise(async (resolve, reject) => {
+    const db = await connection.handleCon();
+    db.query(`SELECT * FROM ${table}`, (err, data) => {
+      if (err) return reject(err);
+      resolve(data);
+      db.end();
+    });
+  });
+}
+
+async function get(table, params, value) {
+  return new Promise(async (resolve, reject) => {
+    const db = await connection.handleCon();
+    db.query(`SELECT * FROM ${table} WHERE ${params}="${value}"`, (err, data) => {
+      console.log(err);
+      if (err) return reject(err);
+      resolve(data);
+      db.end();
+    });
+  });
+}
+
 async function insert(table, data) {
   return new Promise(async (resolve, reject) => {
     const db = await connection.handleCon();
@@ -11,15 +34,15 @@ async function insert(table, data) {
   });
 }
 
-async function get(table, params, value) {
+async function update(table, data) {
   return new Promise(async (resolve, reject) => {
     const db = await connection.handleCon();
     db.query(
-      `SELECT * FROM ${table} WHERE ${params}="${value}"`,
-      (err, data) => {
-        console.log(err);
+      `UPDATE ${table} SET ? WHERE prod_id=?`,
+      [data, data.prod_id],
+      (err, result) => {
         if (err) return reject(err);
-        resolve(data);
+        resolve(result);
         db.end();
       }
     );
@@ -48,7 +71,9 @@ async function query(table, query, join) {
 }
 
 module.exports = {
-  insert,
+  list,
   get,
+  insert,
+  update,
   query,
 };

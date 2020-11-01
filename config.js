@@ -4,7 +4,7 @@ module.exports = {
     port: process.env.API_PORT || 3000,
   },
   jwt: {
-    secret: process.env.JWT_SECRET || "dñlkfjapeiorq93837?X!|",
+    secret: process.env.JWT_SECRET || "dñlkfjapeiorq93837?X!|***+++---JHDYHOP927308;;;;....añsd34870fhoahg",
   },
   mysql: {
     host: process.env.MYSQL_HOST || "localhost",

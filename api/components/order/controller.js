@@ -1,7 +1,7 @@
 const auth = require("../auth");
 const ControllerAuth = require("../auth/index");
 
-const TABLA = "users";
+const TABLA = "orders";
 
 module.exports = function (injectedStore) {
   let store = injectedStore;
@@ -35,7 +35,6 @@ module.exports = function (injectedStore) {
     const password = body.password;
 
     const insertId = await store.insert(TABLA, user);
-    
     if (insertId.insertId) {
       const userId = await store.get(TABLA, "users_id", +insertId.insertId);
       if (userId[0].users_id) {

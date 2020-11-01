@@ -5,7 +5,6 @@ const error = require("../utils/error");
 const secret = config.jwt.secret;
 
 function sign(data) {
-  console.log("auth-sign", data)
   return jwt.sign(data, secret);
 }
 
@@ -14,23 +13,29 @@ function verify(token) {
 }
 
 const check = {
-  own: function (req, owner) {
+  isAdmin: function (req) {
     const decoded = decodeHeader(req);
-    if (decoded.id !== owner) {
-      throw error("No puedes hacer esto", 401);
+    if (decoded.permisos !== 1) {
+      throw error("Unauthorized, contact the administrator", 401);
     }
   },
-  logged: function (req, owner) {
+  isEnable: function (req) {
+    const decoded = decodeHeader(req);
+    if(decoded.activate !== 1) {
+      throw error("Inactive user contact administrator", 401);
+    }
+  },
+  logged: function (req) {
     const decoded = decodeHeader(req);
   },
 };
 
 function getToken(auth) {
   if (!auth) {
-    throw error("No viene token", 401);
+    throw error("No token comes", 401);
   }
   if (auth.indexOf("Bearer ") === -1) {
-    throw error("Formato invalido", 401);
+    throw error("Invalid format", 401);
   }
   let token = auth.replace("Bearer ", "");
   return token;

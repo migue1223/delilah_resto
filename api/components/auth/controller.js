@@ -9,19 +9,52 @@ module.exports = function (injectedStore) {
   }
 
   async function login(body) {
-    if (body.username) {
-      const user = await store.query(TABLA, {
-        auth_username: body.username,
-      });
-      console.log(user);
-      validatePassword(body.password, user.auth_password);
-    }
-    if (body.email) {
-      const email = await store.query(TABLA, {
-        auth_email: body.email,
-      });
-      console.log(email);
-      validatePassword(body.password, email.auth_password);
+    let user = [];
+    const isEmail = validateEmail(body.username);
+    const join = {
+      table: "users",
+      key: "users_id",
+    };
+
+    if (isEmail === true) {
+      const data = await store.query(
+        TABLA,
+        {
+          auth_email: body.username,
+        },
+        join
+      );
+      const isPass = await validatePassword(body.password, data.auth_password);
+      if (isPass === true) {
+        user.push({
+          username: data.auth_username,
+          email: data.auth_email,
+          password: data.auth_password,
+          permisos: data.users_admin,
+          activate: data.users_enable
+        });
+        return auth.sign(user[0]);
+      }
+    } else {
+      const data = await store.query(
+        TABLA,
+        {
+          auth_username: body.username,
+        },
+        join
+      );
+      const isPass = await validatePassword(body.password, data.auth_password);
+      if (isPass === true) {
+        user.push({
+          username: data.auth_username,
+          email: data.auth_email,
+          password: data.auth_password,
+          permisos: data.users_admin,
+          activate: data.users_enable
+        });
+
+        return auth.sign(user[0]);
+      }
     }
   }
 
@@ -40,31 +73,35 @@ module.exports = function (injectedStore) {
   }
 
   async function validateUser(data) {
-    const validateUsername = await store.get(
+    const isUsername = await store.get(
       TABLA,
       "auth_username",
       data.username
     );
-    const validateEmail = await store.get(TABLA, "auth_email", data.email);
+    const isEmail = await store.get(TABLA, "auth_email", data.email);
 
-    if (validateUsername.length > 0 || validateEmail.length > 0) {
-      console.log(validateUsername);
-      console.log(validateEmail);
+    if (isUsername.length > 0 || isEmail.length > 0) {
       throw new Error("Conflict, username or email already exist");
     }
   }
 
   function validatePassword(passBody, passDb) {
-    console.log("passBody", passBody);
-    console.log("passDb", passDb);
     return bcrypt.compare(passBody, passDb).then((sonIguales) => {
-      console.log("bcrypt", sonIguales);
-      // if (sonIguales === true) {
-      //   return auth.sign(data);
-      // } else {
-      //   throw new Error("Información invalida");
-      // }
+      if (sonIguales === true) {
+        return sonIguales;
+      } else {
+        throw new Error("Invalid information");
+      }
     });
+  }
+
+  function validateEmail(email) {
+    const regex = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+    if (regex.test(email)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   return {

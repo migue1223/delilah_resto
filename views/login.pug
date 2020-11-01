@@ -1,0 +1,16 @@
+doctype html
+head
+  meta(charset='UTF-8')
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='stylesheet', href='/stylesheets/style.css')
+  title Login
+header.container-login
+  h1 Dalilah Rest&oacute;
+main.container-form-register
+  form(autocomplete='off' id="form-login")
+    label(for='user-login') Usuario o correo electr&oacute;nico
+    input#user-login(type='text', placeholder='Usuario o Email', required='', autocomplete='off')
+    label(for='name-login') Password
+    input#name-login(type='text', placeholder='Password', required='', autocomplete='off')
+    button(type='submit') INICIAR SESI&Oacute;N
+    a(href='/register') REGISTRARSE

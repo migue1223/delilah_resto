@@ -5,10 +5,10 @@ const Controller = require("./index");
 
 const router = express.Router();
 
-router.get("/", secure("isAdmin"), list);
-router.get("/:id", secure("isAdmin"), get);
+router.get("/", secure("list"), list);
+router.get("/:id", get);
 router.post("/", insert);
-router.put("/", secure("isAdmin"), upsert);
+// router.put("/", secure("update"), upsert);
 
 async function list(req, res) {
   try {
@@ -30,21 +30,13 @@ async function get(req, res) {
 
 async function insert(req, res) {
   try {
-    await Controller.insert(req.body);
+    const upsertId = await Controller.insert(req.body);
     const userId = {
       user: "created",
     };
     response.success(req, res, userId, 201);
   } catch (error) {
     response.error(req, res, error.message, 500);
-  }
-}
-
-async function upsert(req, res) {
-  try {
-    
-  } catch (error) {
-    response.error(req, res, error.message, 500)
   }
 }
 
