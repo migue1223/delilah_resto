@@ -1,19 +1,21 @@
+"use strict";
+
 const express = require("express");
 const secure = require("./secure");
 const response = require("../../../network/response");
-const Controller = require("./index");
+const Controller = require("./controller");
 
 const router = express.Router();
 
 router.get("/", secure("isAdmin"), list);
 router.get("/:id", secure("isAdmin"), get);
 router.post("/", insert);
-router.put("/", secure("isAdmin"), upsert);
+router.put("/", secure("isAdmin"), update);
 
 async function list(req, res) {
   try {
-    const lista = await Controller.list();
-    response.success(req, res, lista, 200);
+    const list = await Controller().list();
+    response.success(req, res, list, 200);
   } catch (error) {
     response.error(req, res, error.message, 500);
   }
@@ -21,30 +23,27 @@ async function list(req, res) {
 
 async function get(req, res) {
   try {
-    const listaId = await Controller.get(req.params.id);
-    response.success(req, res, listaId, 200);
-  } catch (error) {
-    response.error(req, res, error.message, 500);
+    const userId = await Controller().get(req);
+    response.success(req, res, userId, 200);
+  } catch (err) {
+    response.error(req, res, err.message, 500);
   }
 }
 
 async function insert(req, res) {
   try {
-    await Controller.insert(req.body);
-    const userId = {
-      user: "created",
-    };
-    response.success(req, res, userId, 201);
-  } catch (error) {
-    response.error(req, res, error.message, 500);
+    const createUser = await Controller().insert(req);
+    response.success(req, res, createUser, 201);
+  } catch (err) {
+    response.error(req, res, err.message, 500);
   }
 }
 
-async function upsert(req, res) {
+async function update(req, res) {
   try {
-    
+    const updateUser = await Controller().update(req)
   } catch (error) {
-    response.error(req, res, error.message, 500)
+    response.error(req, res, error.message, 500);
   }
 }
 

@@ -1,112 +1,49 @@
-const bcrypt = require("bcrypt");
-const auth = require("../../../auth/index");
-const TABLA = "auth";
+"use strict";
 
-module.exports = function (injectedStore) {
-  let store = injectedStore;
-  if (!store) {
-    store = require("./index");
-  }
+const db = require("../../../store/db");
+const { Op } = require("sequelize");
+const chalk = require("chalk");
+const token = require("../../../auth");
 
-  async function login(body) {
-    let user = [];
-    const isEmail = validateEmail(body.username);
-    const join = {
-      table: "users",
-      key: "users_id",
-    };
-
-    if (isEmail === true) {
-      const data = await store.query(
-        TABLA,
-        {
-          auth_email: body.username,
+module.exports = function () {
+  async function login(req) {
+    try {
+      const { username, password } = req.body;
+      const getUser = await db.user.findOne({
+        where: {
+          [Op.or]: [{ users_username: username }, { users_email: username }],
         },
-        join
-      );
-      const isPass = await validatePassword(body.password, data.auth_password);
-      if (isPass === true) {
-        user.push({
-          username: data.auth_username,
-          email: data.auth_email,
-          password: data.auth_password,
-          permisos: data.users_admin,
-          activate: data.users_enable
-        });
-        return auth.sign(user[0]);
+        include: [
+          {
+            model: db.auth,
+          },
+        ],
+      });
+      if (getUser.dataValues) {
+        const auth_password = getUser.Auths[0].dataValues.auth_password;
+        const result = await db.auth.prototype.validPassword(
+          password,
+          auth_password
+        );
+        if (result) {
+          return token.sign({
+            id: getUser.dataValues.users_id,
+            fullname: getUser.dataValues.users_fullname,
+            email: getUser.dataValues.users_email,
+            phone: getUser.dataValues.users_phone,
+            address: getUser.dataValues.users_address,
+            isAdmin: getUser.dataValues.users_admin,
+            active: getUser.dataValues.users_enable,
+          });
+        }
       }
-    } else {
-      const data = await store.query(
-        TABLA,
-        {
-          auth_username: body.username,
-        },
-        join
-      );
-      const isPass = await validatePassword(body.password, data.auth_password);
-      if (isPass === true) {
-        user.push({
-          username: data.auth_username,
-          email: data.auth_email,
-          password: data.auth_password,
-          permisos: data.users_admin,
-          activate: data.users_enable
-        });
-
-        return auth.sign(user[0]);
-      }
-    }
-  }
-
-  async function insert(data) {
-    const authData = {
-      auth_id: data.id,
-      auth_username: data.username,
-      auth_email: data.email,
-    };
-
-    if (data.password) {
-      authData.auth_password = await bcrypt.hash(data.password, 5);
-    }
-
-    return store.insert(TABLA, authData);
-  }
-
-  async function validateUser(data) {
-    const isUsername = await store.get(
-      TABLA,
-      "auth_username",
-      data.username
-    );
-    const isEmail = await store.get(TABLA, "auth_email", data.email);
-
-    if (isUsername.length > 0 || isEmail.length > 0) {
-      throw new Error("Conflict, username or email already exist");
-    }
-  }
-
-  function validatePassword(passBody, passDb) {
-    return bcrypt.compare(passBody, passDb).then((sonIguales) => {
-      if (sonIguales === true) {
-        return sonIguales;
-      } else {
-        throw new Error("Invalid information");
-      }
-    });
-  }
-
-  function validateEmail(email) {
-    const regex = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-    if (regex.test(email)) {
-      return true;
-    } else {
-      return false;
+    } catch (err) {
+      console.error(chalk.red("auth-ctr"), err);
+      return "Invalid information";
     }
   }
 
   return {
     login,
-    insert,
-    validateUser,
   };
 };

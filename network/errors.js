@@ -1,3 +1,5 @@
+"use strict"
+
 const response = require("./response");
 
 function errors(err, req, res, next) {

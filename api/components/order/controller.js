@@ -1,13 +1,7 @@
-const auth = require("../auth");
-const ControllerAuth = require("../auth/index");
+"use strict";
 
-const TABLA = "orders";
-
-module.exports = function (injectedStore) {
-  let store = injectedStore;
-  if (!store) {
-    store = require("./index");
-  }
+module.exports = function () {
+ 
   async function list() {
     return store.list(TABLA);
   }
@@ -17,10 +11,6 @@ module.exports = function (injectedStore) {
   }
 
   async function insert(body) {
-    await ControllerAuth.validateUser({
-      username: body.username,
-      email: body.email,
-    });
 
     const user = {
       users_username: body.username,

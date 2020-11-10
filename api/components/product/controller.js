@@ -1,10 +1,7 @@
-const TABLA = "products";
+"use strict"
 
-module.exports = function (injectedStore) {
-  let store = injectedStore;
-  if (!store) {
-    store = require("./index");
-  }
+module.exports = function () {
+  
   async function list() {
     return store.list(TABLA);
   }

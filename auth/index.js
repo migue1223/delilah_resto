@@ -1,3 +1,5 @@
+"use strict"
+
 const jwt = require("jsonwebtoken");
 const config = require("../config");
 const error = require("../utils/error");
@@ -15,13 +17,13 @@ function verify(token) {
 const check = {
   isAdmin: function (req) {
     const decoded = decodeHeader(req);
-    if (decoded.permisos !== 1) {
+    if (decoded.isAdmin !== 1) {
       throw error("Unauthorized, contact the administrator", 401);
     }
   },
   isEnable: function (req) {
     const decoded = decodeHeader(req);
-    if(decoded.activate !== 1) {
+    if(decoded.active !== 1) {
       throw error("Inactive user contact administrator", 401);
     }
   },

@@ -1,58 +1,75 @@
-const auth = require("../auth");
-const ControllerAuth = require("../auth/index");
+"use strict";
 
-const TABLA = "users";
+const db = require("../../../store/db");
+const chalk = require("chalk");
 
-module.exports = function (injectedStore) {
-  let store = injectedStore;
-  if (!store) {
-    store = require("./index");
-  }
+module.exports = function () {
   async function list() {
-    return store.list(TABLA);
+    try {
+      return await db.user.findAll();
+    } catch (err) {
+      console.error(chalk.red("err-ctr-user-list"), err);
+    }
   }
 
-  async function get(id) {
-    return store.get(TABLA, id);
+  async function get(req) {
+    try {
+      const user = await db.user.findOne({
+        where: {
+          users_id: req.params.id,
+        },
+      });
+      if (user !== null) {
+        return user;
+      } else {
+        return "Not results";
+      }
+    } catch (err) {
+      console.error(chalk.red("err-ctr-user-findOne"), err);
+    }
   }
 
-  async function insert(body) {
-    await ControllerAuth.validateUser({
-      username: body.username,
-      email: body.email,
-    });
+  async function insert(req) {
+    try {
+      const { username, fullname, email, phone, address } = req.body;
+      const { password } = req.body;
 
-    const user = {
-      users_username: body.username,
-      users_fullname: body.fullname,
-      users_email: body.email,
-      users_phone: body.phone,
-      users_address: body.address,
-      users_admin: 0,
-      users_enable: 0,
-    };
-
-    const password = body.password;
-
-    const insertId = await store.insert(TABLA, user);
-    
-    if (insertId.insertId) {
-      const userId = await store.get(TABLA, "users_id", +insertId.insertId);
-      if (userId[0].users_id) {
-        await auth.insert({
-          id: userId[0].users_id,
-          email: userId[0].users_email,
-          username: userId[0].users_username,
-          password: password,
+      const create = await db.user.create({
+        users_username: username,
+        users_fullname: fullname,
+        users_email: email,
+        users_phone: phone,
+        users_address: address,
+      });
+      if (create.dataValues) {
+        await db.auth.create({
+          auth_username: username,
+          auth_email: email,
+          auth_password: await db.auth.prototype.generateHash(password),
+          UserUsersId: +create.dataValues.users_id,
         });
+        return "User created";
+      }
+    } catch (err) {
+      console.error(chalk.red("err-ctr-user-insert"), err);
+      if (err.original.sqlMessage) {
+        return "User or email already exists";
       }
     }
-    return user;
+  }
+
+  async function update(req) {
+    try {
+      const { username, fullname, email, phone, address } = req.body;
+    } catch (err) {
+      console.error(chalk.red("err-ctr-user-update"), err);
+    }
   }
 
   return {
     list,
     get,
     insert,
+    update,
   };
 };

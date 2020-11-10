@@ -1,3 +1,5 @@
+"use strict";
+
 const auth = require("../../../auth");
 
 module.exports = function checkAuth(action) {

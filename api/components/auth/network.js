@@ -1,17 +1,19 @@
+"use strict";
+
 const express = require("express");
 const response = require("../../../network/response");
-const Controller = require("./index");
+const Controller = require("./controller");
 
 const router = express.Router();
 
-router.get("/login", login);
+router.post("/login", login);
 
 async function login(req, res) {
   try {
-    const token = await Controller.login(req.body);
+    const token = await Controller().login(req);
     response.success(req, res, token, 200);
-  } catch (error) {
-    response.error(req, res, "Invalid information", 400);
+  } catch (err) {
+    response.error(req, res, err.message, 400);
   }
 }
 

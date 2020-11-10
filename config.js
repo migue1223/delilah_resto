@@ -1,3 +1,5 @@
+"use strict"
+
 module.exports = {
   remoteDB: process.env.REMOTE_DB || false,
   api: {
