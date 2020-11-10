@@ -1,34 +1,55 @@
-"use strict"
+"use strict";
+
+const chalk = require("chalk");
+const db = require("../../../store/db");
 
 module.exports = function () {
-  
   async function list() {
-    return store.list(TABLA);
-  }
-
-  async function get(id) {
-    return store.get(TABLA, id);
-  }
-
-  async function insert(body) {
-    await validateNameProduct(body.name);
-
-    const product = {
-      prod_name: body.name,
-      prod_img_url: body.url,
-      prod_price: body.price,
-      prod_enable: body.enable,
-    };
-
-    const insertId = await store.insert(TABLA, product);
-    if (insertId.insertId) {
-      return product;
+    try {
+      return db.product.findAll();
+    } catch (err) {
+      console.error(chalk.red("ctr-prod-list"), err);
     }
   }
 
-  async function update(body) {
-    await validateNameProduct(body.name);
-    
+  async function get(req) {
+    try {
+      const product = await db.product.findOne({
+        where: {
+          id: req.params.id,
+        },
+      });
+      if (product !== null) {
+        return product;
+      } else {
+        return "Not results";
+      }
+    } catch (err) {
+      console.error(chalk.red("ctr-prod-getId"), err);
+    }
+  }
+
+  async function insert(req) {
+    try {
+      const { name, img, price } = req.body;
+
+      const create = await db.product.create({
+        name,
+        img,
+        price,
+      });
+      if (create.dataValues) {
+        return "Product created";
+      }
+    } catch (err) {
+      console.error(chalk.red("ctr-prod-insert"), err);
+      if (err.original.sqlMessage) {
+        return "Product name already exists";
+      }
+    }
+  }
+
+  async function updated(body) {
     const product = {
       prod_id: body.id,
       prod_name: body.name,
@@ -43,11 +64,10 @@ module.exports = function () {
     }
   }
 
-  async function validateNameProduct(name) {
-    const isName = await store.get(TABLA, "prod_name", name);
-
-    if (isName.length > 0 && isName[0].prod_id) {
-      throw new Error("Conflict, product name already exist");
+  async function deleted(req) {
+    try {
+    } catch (err) {
+      console.error(chalk.red("ctr-prod-delete"), err);
     }
   }
 
@@ -55,6 +75,7 @@ module.exports = function () {
     list,
     get,
     insert,
-    update,
+    updated,
+    deleted,
   };
 };

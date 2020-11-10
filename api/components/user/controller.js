@@ -16,7 +16,7 @@ module.exports = function () {
     try {
       const user = await db.user.findOne({
         where: {
-          users_id: req.params.id,
+          id: req.params.id,
         },
       });
       if (user !== null) {
@@ -35,18 +35,17 @@ module.exports = function () {
       const { password } = req.body;
 
       const create = await db.user.create({
-        users_username: username,
-        users_fullname: fullname,
-        users_email: email,
-        users_phone: phone,
-        users_address: address,
+        username,
+        fullname,
+        email,
+        phone,
+        address,
       });
+   
       if (create.dataValues) {
-        await db.auth.create({
-          auth_username: username,
-          auth_email: email,
-          auth_password: await db.auth.prototype.generateHash(password),
-          UserUsersId: +create.dataValues.users_id,
+        const createAuth = await db.auth.create({
+          password: await db.auth.prototype.generateHash(password),
+          UserId: +create.dataValues.id,
         });
         return "User created";
       }
@@ -61,8 +60,64 @@ module.exports = function () {
   async function update(req) {
     try {
       const { username, fullname, email, phone, address } = req.body;
+      const updateUser = await db.user.update(
+        {
+          username,
+          fullname,
+          email,
+          phone,
+          address,
+        },
+        { where: { id: req.params.id } }
+      );
+      if (updateUser.length > 0) {
+        return "User updated";
+      }
     } catch (err) {
       console.error(chalk.red("err-ctr-user-update"), err);
+      return "User or email already exists";
+    }
+  }
+
+  async function enableUser(req) {
+    try {
+      const { enable } = req.body;
+      const enableUser = await db.user.update(
+        {
+          enable,
+        },
+        {
+          where: {
+            id: req.params.id,
+          },
+        }
+      );
+      if (enableUser.length > 0) {
+        return "User udpated";
+      }
+    } catch (err) {
+      console.error(chalk.red("err-ctr-user-enable"), err);
+    }
+  }
+
+  async function enableAdmin(req) {
+    try {
+      const { admin } = req.body;
+      const enableAdmin = await db.user.update(
+        {
+          admin,
+        },
+        {
+          where: {
+            id: req.params.id,
+          },
+        }
+      );
+      if (enableAdmin.length > 0) {
+        return "User udpated";
+      }
+    } catch (err) {
+      console.error(chalk.red("err-ctr-user-enable"), err);
     }
   }
 
@@ -71,5 +126,7 @@ module.exports = function () {
     get,
     insert,
     update,
+    enableUser,
+    enableAdmin,
   };
 };

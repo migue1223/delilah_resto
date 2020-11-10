@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 
 const express = require("express");
 const secure = require("./secure");
@@ -8,49 +8,53 @@ const Controller = require("./controller");
 const router = express.Router();
 
 router.get("/", secure("isEnable"), list);
-router.get("/:id", secure("isAdmin"), get);
+router.get("/:id", secure("isEnable"), get);
 router.post("/", secure("isAdmin"), insert);
-router.put("/", secure("isAdmin"), update);
+router.put("/", secure("isAdmin"), updated);
+router.delete("/:id", secure("isAdmin"), deleted);
 
 async function list(req, res) {
   try {
-    const lista = await Controller.list();
-    response.success(req, res, lista, 200);
-  } catch (error) {
-    response.error(req, res, error.message, 500);
+    const list = await Controller().list();
+    response.success(req, res, list, 200);
+  } catch (err) {
+    response.error(req, res, err.message, 500);
   }
 }
 
 async function get(req, res) {
   try {
-    const listaId = await Controller.get(req.params.id);
-    response.success(req, res, listaId, 200);
-  } catch (error) {
-    response.error(req, res, error.message, 500);
+    const getProduct = await Controller().get(req.params.id);
+    response.success(req, res, getProduct, 200);
+  } catch (err) {
+    response.error(req, res, err.message, 500);
   }
 }
 
 async function insert(req, res) {
   try {
-    await Controller.insert(req.body);
-    const productId = {
-      product: "created",
-    };
-    response.success(req, res, productId, 201);
-  } catch (error) {
-    response.error(req, res, error.message, 500);
+    const createProduct = await Controller().insert(req);
+    response.success(req, res, createProduct, 201);
+  } catch (err) {
+    response.error(req, res, err.message, 500);
   }
 }
 
-async function update(req, res) {
+async function updated(req, res) {
   try {
-    await Controller.update(req.body);
-    const updatedId = {
-      product: "updated",
-    };
-    response.success(req, res, updatedId, 201);
-  } catch (error) {
-    response.error(req, res, error.message, 500);
+    const updateProduct = await Controller().updated(req);
+    response.success(req, res, updateProduct, 201);
+  } catch (err) {
+    response.error(req, res, err.message, 500);
+  }
+}
+
+async function deleted(req, res) {
+  try {
+    const deletedProduct = await Controller().deleted(req)
+    response.success(req, res, deletedProduct, 201)
+  } catch (err) {
+    response.error(req, res, err.message, 500);
   }
 }
 

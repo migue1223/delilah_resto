@@ -11,7 +11,7 @@ module.exports = function () {
       const { username, password } = req.body;
       const getUser = await db.user.findOne({
         where: {
-          [Op.or]: [{ users_username: username }, { users_email: username }],
+          [Op.or]: [{ username }, { email: username }],
         },
         include: [
           {
@@ -20,20 +20,20 @@ module.exports = function () {
         ],
       });
       if (getUser.dataValues) {
-        const auth_password = getUser.Auths[0].dataValues.auth_password;
+        const auth_password = getUser.Auths[0].dataValues.password;
         const result = await db.auth.prototype.validPassword(
           password,
           auth_password
         );
         if (result) {
           return token.sign({
-            id: getUser.dataValues.users_id,
-            fullname: getUser.dataValues.users_fullname,
-            email: getUser.dataValues.users_email,
-            phone: getUser.dataValues.users_phone,
-            address: getUser.dataValues.users_address,
-            isAdmin: getUser.dataValues.users_admin,
-            active: getUser.dataValues.users_enable,
+            id: getUser.dataValues.id,
+            fullname: getUser.dataValues.fullname,
+            email: getUser.dataValues.email,
+            phone: getUser.dataValues.phone,
+            address: getUser.dataValues.address,
+            isAdmin: getUser.dataValues.admin,
+            active: getUser.dataValues.enable,
           });
         }
       }

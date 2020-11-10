@@ -6,19 +6,26 @@ module.exports = (sequelize, DataTypes) => {
   const Auth = sequelize.define(
     "Auth",
     {
-      auth_id: {
+      id: {
+        field: "auth_id",
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
-      },
-      auth_password: {
-        type: DataTypes.STRING(60),
         allowNull: false,
+      },
+      password: {
+        field: "auth_password",
+        type: DataTypes.TEXT,
         validate: {
           notEmpty: {
             msg: "El password no puede ir vacio",
           },
         },
+      },
+      createAt: {
+        field: "auth_create_at",
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.literal("NOW()"),
       },
     },
     {
@@ -32,5 +39,6 @@ module.exports = (sequelize, DataTypes) => {
   Auth.prototype.validPassword = function (password, hash) {
     return bcrypt.compareSync(password, hash);
   };
+
   return Auth;
 };

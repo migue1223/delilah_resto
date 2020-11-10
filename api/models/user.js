@@ -1,16 +1,17 @@
 "use strict";
 
 module.exports = (sequelize, DataTypes) => {
-  const User = sequelize.define("Users", {
-    users_id: {
+  const User = sequelize.define("User", {
+    id: {
+      field: "user_id",
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true,
       autoIncrement: true,
     },
-    users_username: {
+   username: {
+      field: "user_username",
       type: DataTypes.STRING(60),
-      allowNull: false,
       validate: {
         notEmpty: {
           msg: "Username no puede ir vacio",
@@ -21,18 +22,18 @@ module.exports = (sequelize, DataTypes) => {
         msg: "Usuario Ya Registrado",
       },
     },
-    users_fullname: {
+    fullname: {
+      field: "user_fullname",
       type: DataTypes.STRING(60),
-      allowNull: false,
       validate: {
         notEmpty: {
           msg: "El fullname no puede ir vacio",
         },
       },
     },
-    users_email: {
+    email: {
+      field: "user_email",
       type: DataTypes.STRING(60),
-      allowNull: false,
       validate: {
         isEmail: {
           msg: "Agrega un Correo Válido",
@@ -46,32 +47,39 @@ module.exports = (sequelize, DataTypes) => {
         msg: "Email Ya Registrado",
       },
     },
-    users_phone: {
+    phone: {
+      field: "user_phone",
       type: DataTypes.STRING(20),
-      allowNull: false,
       validate: {
         notEmpty: {
           msg: "Phone no puede ir vacio",
         },
       },
     },
-    users_address: {
+    address: {
+      field: "user_address",
       type: DataTypes.STRING(60),
-      allowNull: false,
       validate: {
         notEmpty: {
           msg: "Address no puede ir vacio",
         },
       },
     },
-    users_admin: {
+    admin: {
+      field: "user_admin",
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
-    users_enable: {
+    enable: {
+      field: "user_enable",
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
+    createdAt: {
+      field: 'user_created_at',
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.literal('NOW()')
+    }
   }, {
     underscored: true
   });
