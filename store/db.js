@@ -23,9 +23,9 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-db.auth = require("../api/models/auth")(sequelize, Sequelize);
-db.product = require("../api/models/product")(sequelize, Sequelize);
-db.user = require("../api/models/user")(sequelize, Sequelize);
+db.auth = require("../models/Auth")(sequelize, Sequelize);
+db.product = require("../models/Product")(sequelize, Sequelize);
+db.user = require("../models/User")(sequelize, Sequelize);
 
 db.auth.belongsTo(db.user);
 db.user.hasMany(db.auth);

@@ -1,15 +1,11 @@
 "use strict";
 
 const bodyParser = require("body-parser");
-const config = require("./config.js");
+const config = require("./config");
 const cors = require("cors");
 const express = require("express");
+const routes = require("./routes");
 const swaggerUi = require("swagger-ui-express");
-
-const auth = require("./api/components/auth/network");
-const order = require("./api/components/order/network");
-const product = require("./api/components/product/network");
-const user = require("./api/components/user/network");
 
 const db = require("./store/db");
 
@@ -24,17 +20,15 @@ const app = express();
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
 const swaggerDoc = require("./swagger.json");
 
-//routes api
-app.use("/api/auth", auth);
-app.use("/api/user", user);
-app.use("/api/order", order);
-app.use("/api/product", product);
-
 // routes docs api
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDoc));
+
+//routes api
+app.use("/", routes());
 
 app.use(errors);
 
