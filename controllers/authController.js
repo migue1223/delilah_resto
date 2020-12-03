@@ -19,7 +19,7 @@ exports.login = async (req, res, next) => {
         },
       ],
     });
-    if (getUser.dataValues) {
+    if (getUser.dataValues.enable !== 0) {
       const auth_password = getUser.Auths[0].dataValues.password;
       const result = await db.auth.prototype.validPassword(
         password,
@@ -35,8 +35,15 @@ exports.login = async (req, res, next) => {
           isAdmin: getUser.dataValues.admin,
           active: getUser.dataValues.enable,
         });
-        response.success(req, res, token, 201);
+        return response.success(req, res, token, 201);
       }
+    } else {
+      return response.error(
+        req,
+        res,
+        "Inactive user contact administrator",
+        500
+      );
     }
   } catch (err) {
     console.error(chalk.red("auth-ctr"), err);

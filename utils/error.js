@@ -1,11 +1,16 @@
 "use strict";
 
-function err(message, code) {
-  let e = new Error(message);
-  if (code) {
-    e.statusCode = code;
+const chalk = require("chalk");
+
+function errorHandler(err, req, res, next) {
+  console.log(err);
+  if (res.headersSent) {
+    console.log(err);
+    return next(err);
   }
-  return e;
+  console.log(chalk.red("error", err));
+  res.status(500);
+  res.send("Internal Server Error");
 }
 
-module.exports = err;
+module.exports = errorHandler;

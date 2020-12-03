@@ -2,6 +2,7 @@
 
 const jwt = require("jsonwebtoken");
 const config = require("../config");
+const response = require("../network/response");
 const error = require("../utils/error");
 
 const secret = config.jwt.secret;
@@ -15,25 +16,25 @@ function verify(token) {
 }
 
 const check = {
-  isAdmin: function (req) {
-    const decoded = decodeHeader(req);
+  isAdmin: function (req, res) {
+    const decoded = decodeHeader(req, res);
     if (+decoded.isAdmin !== 1) {
-      throw error("Unauthorized, contact the administrator", 401);
+      response.error(req, res, "Unauthorized, contact the administrator", 500);
     }
   },
-  isEnable: function (req) {
-    const decoded = decodeHeader(req);
-    if (+decoded.active !== 1) {
-      throw error("Inactive user contact administrator", 401);
+  isEnable: function (req, res) {
+    const decoded = decodeHeader(req, res);
+    if (+decoded.enable !== 1) {
+      response.error(req, res, "Inactive user contact administrator", 500);
     }
   },
-  logged: function (req) {
-    const decoded = decodeHeader(req);
+  logged: function (req, res) {
+    const decoded = decodeHeader(req, res);
   },
-  updated: function (req) {
-    const decoded = decodeHeader(req);
+  updated: function (req, res) {
+    const decoded = decodeHeader(req, res);
     if (+decoded.id !== +req.params.id) {
-      throw error("You can not do this");
+      response.error(req, res, "You can not do this", 500);
     }
   },
 };
@@ -49,7 +50,7 @@ function getToken(auth) {
   return token;
 }
 
-function decodeHeader(req) {
+function decodeHeader(req, res) {
   const authorization = req.headers.authorization || "";
   const token = getToken(authorization);
   const decoded = verify(token);

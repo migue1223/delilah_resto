@@ -21,10 +21,13 @@ exports.getUser = async (req, res, next) => {
         id: req.params.id,
       },
     });
+    if (!user) {
+      response.error(req, res, "", 404);
+    }
     response.success(req, res, user, 201);
   } catch (err) {
     console.error(chalk.red("err-ctr-user-findOne"), err);
-    response.error(req, res, err.message, 500);
+    response.error(req, res, "Internal Server Error", 500);
   }
 };
 
@@ -45,7 +48,7 @@ exports.insertUser = async (req, res, next) => {
         password: await db.auth.prototype.generateHash(password),
         UserId: +create.dataValues.id,
       });
-      response.success(req, res, create, 201);
+      response.success(req, res, "User created", 201);
     }
   } catch (err) {
     console.error(chalk.red("err-ctr-user-insert"), err);

@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       unique: {
         args: true,
-        msg: "Usuario Ya Registrado",
+        msg: "Usuario o Email ya registrado",
       },
     },
     fullname: {
@@ -44,7 +44,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       unique: {
         args: true,
-        msg: "Email Ya Registrado",
+        msg: "Usuario o Email ya registrado",
       },
     },
     phone: {
