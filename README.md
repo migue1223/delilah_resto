@@ -15,11 +15,12 @@ Proyecto Backend del curso de Desarrollo Web Full Stack de Acámica.
 
 ### Paso 1: Clonar Proyecto:
 
-- Clonar repositorio desde el [siguiente link](https://github.com/KaribelBT/delilah_resto.git)
+- Clonar repositorio desde el [siguiente link](https://github.com/migue1223/delilah_resto.git)
 
 - Abrir terminal y ejecutar
 
-`git clone https://github.com/KaribelBT/delilah_resto.git`
+- mkdir delilah_resto
+- `git clone https://github.com/KaribelBT/delilah_resto.git`
 
 ### Paso 2: Instalar dependencias
 
@@ -29,9 +30,8 @@ Proyecto Backend del curso de Desarrollo Web Full Stack de Acámica.
 
 ### Paso 3: Configurar variables de entorno
 
-- Abrir el archivo `config_sample.js` ubicado dentro de la carpeta `config` del proyecto clonado
-- Reemplazar el string `escribeTuContraseñaSuperSecreta` por una contraseña secreta y guardar el cambio
-- Renombrar el archivo como `config.js`
+- Abrir el archivo `index.js` ubicado dentro de la carpeta `config` del proyecto clonado
+- Reemplazar todas las variables por la configuración de tu mysql y jwt secret
 
 ### Paso 4: Crear la base de datos
 
@@ -40,14 +40,14 @@ Proyecto Backend del curso de Desarrollo Web Full Stack de Acámica.
 - Si no encuentra XAMPP Panel de Control, por terminal ejecutar:
   `sudo /opt/lampp/lampp start`
 - Ingresar desde el navegador a la ruta `http://localhost/phpmyadmin/index.php`
-- Abrir el archivo `db_queries.sql` ubicado dentro de la carpeta `data_base` del proyecto clonado
+- Abrir el archivo `database.sql` ubicado dentro de la carpeta `data_base` del proyecto clonado
 - Crear la base de datos, se puede importar el archivo o se puede copiar su contenido y pegar en la solapa de SQL
 
 ### Paso 5: Iniciar el servidor
 
 - Desde la terminal ubicandose en la raiz del proyecto, ejecutar:
 
-`node server.js`
+`npm run start`
 
 ### Paso 6: Hacer consultas a la API
 
@@ -57,4 +57,4 @@ Proyecto Backend del curso de Desarrollo Web Full Stack de Acámica.
 
 ## Documentación de la API
 
-- Para ver la documentación de la API, puede abrir el archivo `delilah_resto_docs.yml` ubicado en el directorio raiz del proyecto o puede ingresar a [este link](https://app.swaggerhub.com/apis/KaribelBT/delilah_resto_documentation/1.0.0)
+- Para ver la documentación de la API, puede abrir el archivo `delilah_resto_docs.yml` ubicado en el directorio raiz del proyecto o puede ingresar a [este link](https://app.swaggerhub.com/apis/KaribelBT/delilah_resto_documentation/1.0.0) o puese poner en su navegador [este link](http://localhost:3000/api-docs)
