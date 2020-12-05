@@ -19,31 +19,35 @@ exports.login = async (req, res, next) => {
         },
       ],
     });
-    if (getUser.dataValues.enable !== 0) {
-      const auth_password = getUser.Auths[0].dataValues.password;
-      const result = await db.auth.prototype.validPassword(
-        password,
-        auth_password
-      );
-      if (result) {
-        const token = jwt.sign({
-          id: getUser.dataValues.id,
-          fullname: getUser.dataValues.fullname,
-          email: getUser.dataValues.email,
-          phone: getUser.dataValues.phone,
-          address: getUser.dataValues.address,
-          isAdmin: getUser.dataValues.admin,
-          active: getUser.dataValues.enable,
-        });
-        return response.success(req, res, token, 201);
+    if (getUser) {
+      if (getUser.dataValues.enable !== 0) {
+        const auth_password = getUser.Auths[0].dataValues.password;
+        const result = await db.auth.prototype.validPassword(
+          password,
+          auth_password
+        );
+        if (result) {
+          const token = jwt.sign({
+            id: getUser.dataValues.id,
+            fullname: getUser.dataValues.fullname,
+            email: getUser.dataValues.email,
+            phone: getUser.dataValues.phone,
+            address: getUser.dataValues.address,
+            isAdmin: getUser.dataValues.admin,
+            active: getUser.dataValues.enable,
+          });
+          return response.success(req, res, token, 201);
+        }
+      } else {
+        return response.error(
+          req,
+          res,
+          "Inactive user contact administrator",
+          500
+        );
       }
     } else {
-      return response.error(
-        req,
-        res,
-        "Inactive user contact administrator",
-        500
-      );
+      response.error(req, res, "User or email does not exist", 500);
     }
   } catch (err) {
     console.error(chalk.red("auth-ctr"), err);

@@ -24,7 +24,7 @@ const check = {
   },
   isEnable: function (req, res) {
     const decoded = decodeHeader(req, res);
-    if (+decoded.enable !== 1) {
+    if (+decoded.active !== 1) {
       response.error(req, res, "Inactive user contact administrator", 500);
     }
   },

@@ -1,4 +1,4 @@
-"use strict"
+"use strict";
 
 exports.success = function (req, res, message, status) {
   let statusCode = status || 200;

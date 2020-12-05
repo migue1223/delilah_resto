@@ -13,13 +13,27 @@ module.exports = function () {
   router.post("/login", authController.login);
 
   //order
+  router.get("/order", secure("isAdmin"), orderController.listOrder);
+  router.get("/order/:id", secure("isEnable"), orderController.getOrder);
+  router.get("/order-user", secure("isEnable"), orderController.getOrderUser);
+  router.post("/order", secure("isEnable"), orderController.insertOrder);
+  router.put("/order/:id", secure("isAdmin"), orderController.updatedOrder);
+  router.delete("/order/:id", secure("isEnable"), orderController.deletedOrder);
 
   //product
-  router.get("/product", secure("isEnable"), productController.listProduct);
+  router.get("/product", secure("isAdmin"), productController.listProduct);
   router.get("/product/:id", secure("isEnable"), productController.getProduct);
   router.post("/product", secure("isAdmin"), productController.insertProduc);
-  router.put("/product/:id", secure("isAdmin"), productController.updatedProduct);
-  router.delete("/product/:id", secure("isAdmin"), productController.deletedProduct);
+  router.put(
+    "/product/:id",
+    secure("isAdmin"),
+    productController.updatedProduct
+  );
+  router.delete(
+    "/product/:id",
+    secure("isAdmin"),
+    productController.deletedProduct
+  );
 
   //user
   router.get("/user", secure("isAdmin"), userController.listUser);

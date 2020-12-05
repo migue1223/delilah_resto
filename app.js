@@ -1,9 +1,11 @@
 "use strict";
 
+require("dotenv").config();
 const bodyParser = require("body-parser");
 const config = require("./config");
 const cors = require("cors");
 const express = require("express");
+const helmet = require("helmet");
 const routes = require("./routes");
 const swaggerUi = require("swagger-ui-express");
 
@@ -21,6 +23,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(helmet());
 
 const swaggerDoc = require("./swagger.json");
 

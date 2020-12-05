@@ -16,12 +16,12 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(60),
         validate: {
           notEmpty: {
-            msg: "Name no puede ir vacio",
+            msg: "Name cannot be empty",
           },
         },
         unique: {
           args: true,
-          msg: "Producto Ya Registrado",
+          msg: "Product already registered",
         },
       },
       img: {
