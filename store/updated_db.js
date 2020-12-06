@@ -100,15 +100,6 @@ const status = [
   },
 ];
 
-async function createdDatabase() {
-  return new Promise((resolve, reject) => {
-    connection.query("CREATE DATABASE delilah_resto", (err, result) => {
-      if (err) return reject(err);
-      resolve(result);
-    });
-  });
-}
-
 async function insert(table, data) {
   return new Promise((resolve, reject) => {
     connection.query(`INSERT INTO ${table} SET ?`, data, (err, result) => {
