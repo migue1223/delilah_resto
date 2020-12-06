@@ -1,5 +1,7 @@
 "use strict";
 
+const moment = require("moment");
+
 module.exports = (sequelize, DataTypes) => {
   const Order = sequelize.define(
     "Order",
@@ -14,13 +16,13 @@ module.exports = (sequelize, DataTypes) => {
       created: {
         field: "order_create_time",
         type: DataTypes.DATE,
-        defaultValue: DataTypes.literal("NOW()"),
+        defaultValue: moment().format("YYYY-MM-DD HH:mm:ss"),
         allowNull: false,
       },
       createdAt: {
         field: "order_create_at",
         type: DataTypes.DATE,
-        defaultValue: DataTypes.literal("NOW()"),
+        defaultValue: moment().format("YYYY-MM-DD HH:mm:ss"),
       },
     },
     {

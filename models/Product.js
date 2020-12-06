@@ -1,5 +1,7 @@
 "use strict";
 
+const moment = require("moment");
+
 module.exports = (sequelize, DataTypes) => {
   const Product = sequelize.define(
     "Product",
@@ -41,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
       createdAt: {
         field: "prod_create_at",
         type: DataTypes.DATE,
-        defaultValue: DataTypes.literal("NOW()"),
+        defaultValue: moment().format("YYYY-MM-DD HH:mm:ss"),
       },
     },
     {

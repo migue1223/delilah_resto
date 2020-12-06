@@ -2,13 +2,14 @@
 require("dotenv").config();
 
 const mysql = require("mysql");
+const config = require("../config/");
 
 const dbconf = {
-  host: process.env.MYSQL_HOST,
-  user: process.env.MYSQL_USER,
-  password: process.env.MYSQL_PASS,
-  database: process.env.MYSQL_DB,
-  port: process.env.MYSQL_PORT,
+  host: config.mysql.host,
+  user: config.mysql.user,
+  password: config.mysql.password,
+  database: config.mysql.database,
+  port: config.mysql.port,
 };
 
 let connection;
@@ -39,7 +40,7 @@ const products = [
     prod_name: "Hamburguesa Clásica",
     prod_img_url:
       "https://sifu.unileversolutions.com/image/es-MX/recipe-topvisual/2/1260-709/hamburguesa-clasica-50425188.jpg",
-    prod_price: 100,
+    prod_price: 200,
   },
   {
     prod_name: "Sandwich veggie",
@@ -51,7 +52,7 @@ const products = [
     prod_name: "Ensalada veggie",
     prod_img_url:
       "https://img-global.cpcdn.com/recipes/365784663a8df297/751x532cq70/ensalada-veggie-de-pepino-foto-principal.jpg",
-    prod_price: 100,
+    prod_price: 200,
   },
   {
     prod_name: "Focaccia",
@@ -63,7 +64,7 @@ const products = [
     prod_name: "Sandwich de Focaccia",
     prod_img_url:
       "https://www.petitchef.es/imgupl/recipe/focaccia-sandwich--md-166713p249402.jpg",
-    prod_price: 100,
+    prod_price: 200,
   },
 ];
 

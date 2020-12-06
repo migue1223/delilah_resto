@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const secure = require("../auth/secure");
 
+const { body } = require("express-validator");
+
 //import controller
 const authController = require("../controllers/authController");
 const orderController = require("../controllers/orderController");
@@ -27,10 +29,20 @@ module.exports = function () {
   //product
   router.get("/product", secure("isEnable"), productController.listProduct);
   router.get("/product/:id", secure("isEnable"), productController.getProduct);
-  router.post("/product", secure("isAdmin"), productController.insertProduc);
+  router.post(
+    "/product",
+    body("name").not().isEmpty().trim().escape(),
+    body("img").not().isEmpty().trim().escape(),
+    body("price").isInt(),
+    secure("isAdmin"),
+    productController.insertProduc
+  );
   router.put(
     "/product/:id",
     secure("isAdmin"),
+    body("name").not().isEmpty().trim().escape(),
+    body("img").not().isEmpty().trim().escape(),
+    body("price").isInt(),
     productController.updatedProduct
   );
   router.delete(
@@ -42,8 +54,25 @@ module.exports = function () {
   //user
   router.get("/user", secure("isAdmin"), userController.listUser);
   router.get("/user/:id", secure("isAdmin"), userController.getUser);
-  router.post("/user", userController.insertUser);
-  router.put("/user/:id", secure("update"), userController.updateUser);
+  router.post(
+    "/user",
+    body("username").not().isEmpty().trim().escape(),
+    body("fullname").not().isEmpty().trim().escape(),
+    body("email").isEmail(),
+    body("phone").not().isEmpty().trim().escape(),
+    body("address").not().isEmpty().trim().escape(),
+    userController.insertUser
+  );
+  router.put(
+    "/user/:id",
+    secure("update"),
+    body("username").not().isEmpty().trim().escape(),
+    body("fullname").not().isEmpty().trim().escape(),
+    body("email").isEmail(),
+    body("phone").not().isEmpty().trim().escape(),
+    body("address").not().isEmpty().trim().escape(),
+    userController.updateUser
+  );
   router.put("/user/:id/enable", secure("isAdmin"), userController.enableUser);
   router.put("/user/:id/admin", secure("isEnable"), userController.enableAdmin);
   router.delete("/user/:id", secure("isAdmin"), userController.deletedUser);

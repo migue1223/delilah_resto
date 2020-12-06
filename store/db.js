@@ -1,23 +1,39 @@
 "use strict";
 
+const config = require("../config/");
 const Sequelize = require("sequelize");
 
-const sequelize = new Sequelize("delilah_resto", "root", "root", {
-  host: "127.0.0.1",
-  dialect: "mysql",
-  port: "3308",
-  define: {
-    timestamps: false,
-    underscored: true,
-  },
-  pool: {
-    max: 5,
-    min: 0,
-    acquire: 30000,
-    idle: 10000,
-  },
-});
-
+const sequelize = new Sequelize(
+  config.mysql.database,
+  config.mysql.user,
+  config.mysql.password,
+  {
+    host: config.mysql.host,
+    port: config.mysql.port,
+    dialect: "mysql",
+    charset: "utf8",
+    collate: "utf8_general_ci",
+    query: {
+      raw: true,
+    },
+    loggin: true,
+    dialectOptions: {
+      dateStrings: true,
+      typeCast: true,
+    },
+    timezone: "+05:30",
+    define: {
+      timestamps: false,
+      underscored: true,
+    },
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000,
+    },
+  }
+);
 
 const db = {};
 

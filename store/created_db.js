@@ -3,12 +3,13 @@ require("dotenv").config();
 
 const db = require("./db");
 const mysql = require("mysql");
+const config = require("../config/");
 
 const dbconf = {
-  host: process.env.MYSQL_HOST,
-  user: process.env.MYSQL_USER,
-  password: process.env.MYSQL_PASS,
-  port: process.env.MYSQL_PORT,
+  host: config.mysql.host,
+  user: config.mysql.user,
+  password: config.mysql.password,
+  port: config.mysql.port,
 };
 
 let connection;
@@ -43,8 +44,9 @@ async function createdDatabase() {
 createdDatabase().then(() => {
   db.sequelize
     .sync()
-    .then(() => {
+    .then(async () => {
       console.log("Conectado al Servidor");
+      await db.sequelize.close();
       connection.end();
     })
     .catch((error) => console.log(error));

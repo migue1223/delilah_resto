@@ -1,6 +1,7 @@
 "use strict";
 
 const bcrypt = require("bcrypt");
+const moment = require("moment");
 
 module.exports = (sequelize, DataTypes) => {
   const Auth = sequelize.define(
@@ -25,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       createAt: {
         field: "auth_create_at",
         type: DataTypes.DATE,
-        defaultValue: DataTypes.literal("NOW()"),
+        defaultValue: moment().format("YYYY-MM-DD HH:mm:ss"),
       },
     },
     {

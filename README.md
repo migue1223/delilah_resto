@@ -30,7 +30,7 @@ Proyecto Backend del curso de Desarrollo Web Full Stack de Acámica.
 
 ### Paso 3: Configurar variables de entorno
 
-- Abrir el archivo `index.js` ubicado dentro de la carpeta `config` del proyecto clonado
+- Abrir el archivo `index.js` ubicado dentro de la carpeta `config` del proyecto clonado o crear el archivo .env
 - Reemplazar todas las variables por la configuración de tu mysql y jwt secret
 
 ### Paso 4: Crear la base de datos
@@ -42,6 +42,7 @@ Proyecto Backend del curso de Desarrollo Web Full Stack de Acámica.
 - Ingresar desde el navegador a la ruta `http://localhost/phpmyadmin/index.php`
 - Abrir el archivo `database.sql` ubicado dentro de la carpeta `data_base` del proyecto clonado
 - Crear la base de datos, se puede importar el archivo o se puede copiar su contenido y pegar en la solapa de SQL
+- Puede ejecutar npm run database para crear toda la base de datos desde la consola y esperar unos segundos mientras se configura todo
 
 ### Paso 5: Iniciar el servidor
 
