@@ -15,13 +15,17 @@ module.exports = function () {
   //order
   router.get("/order", secure("isAdmin"), orderController.listOrder);
   router.get("/order/:id", secure("isEnable"), orderController.getOrder);
-  router.get("/order-user", secure("isEnable"), orderController.getOrderUser);
+  router.get("/order-user", secure("isEnable"), orderController.getOrderUserId);
   router.post("/order", secure("isEnable"), orderController.insertOrder);
-  router.put("/order/:id", secure("isAdmin"), orderController.updatedOrder);
-  router.delete("/order/:id", secure("isEnable"), orderController.deletedOrder);
+  router.put(
+    "/order/:id/status",
+    secure("isAdmin"),
+    orderController.updatedOrderStatus
+  );
+  router.delete("/order/:id", secure("isAdmin"), orderController.deletedOrder);
 
   //product
-  router.get("/product", secure("isAdmin"), productController.listProduct);
+  router.get("/product", secure("isEnable"), productController.listProduct);
   router.get("/product/:id", secure("isEnable"), productController.getProduct);
   router.post("/product", secure("isAdmin"), productController.insertProduc);
   router.put(
@@ -40,8 +44,8 @@ module.exports = function () {
   router.get("/user/:id", secure("isAdmin"), userController.getUser);
   router.post("/user", userController.insertUser);
   router.put("/user/:id", secure("update"), userController.updateUser);
-  router.put("/user/enable/:id", secure("isAdmin"), userController.enableUser);
-  router.put("/user/admin/:id", secure("isAdmin"), userController.enableAdmin);
+  router.put("/user/:id/enable", secure("isAdmin"), userController.enableUser);
+  router.put("/user/:id/admin", secure("isEnable"), userController.enableAdmin);
   router.delete("/user/:id", secure("isAdmin"), userController.deletedUser);
 
   return router;

@@ -36,18 +36,20 @@ exports.login = async (req, res, next) => {
             isAdmin: getUser.dataValues.admin,
             active: getUser.dataValues.enable,
           });
-          return response.success(req, res, token, 201);
+          return response.success(req, res, token, 200);
+        } else {
+          response.error(req, res, "Incorrect password", 403);
         }
       } else {
         return response.error(
           req,
           res,
           "Inactive user contact administrator",
-          500
+          401
         );
       }
     } else {
-      response.error(req, res, "User or email does not exist", 500);
+      response.error(req, res, "User or email does not exist", 404);
     }
   } catch (err) {
     console.error(chalk.red("auth-ctr"), err);

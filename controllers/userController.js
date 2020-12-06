@@ -7,7 +7,7 @@ const response = require("../network/response");
 exports.listUser = async (req, res, next) => {
   try {
     const users = await db.user.findAll();
-    response.success(req, res, users, 201);
+    response.success(req, res, users, 200);
   } catch (err) {
     console.error(chalk.red("err-ctr-user-list"), err);
     response.error(req, res, err.message, 501);
@@ -24,7 +24,7 @@ exports.getUser = async (req, res, next) => {
     if (!user) {
       response.error(req, res, "", 404);
     }
-    response.success(req, res, user, 201);
+    response.success(req, res, user, 200);
   } catch (err) {
     console.error(chalk.red("err-ctr-user-findOne"), err);
     response.error(req, res, "Internal Server Error", 500);
@@ -48,7 +48,7 @@ exports.insertUser = async (req, res, next) => {
         password: await db.auth.prototype.generateHash(password),
         UserId: +create.dataValues.id,
       });
-      response.success(req, res, "User created", 201);
+      response.success(req, res, create, 201);
     }
   } catch (err) {
     console.error(chalk.red("err-ctr-user-insert"), err);
@@ -58,18 +58,32 @@ exports.insertUser = async (req, res, next) => {
 
 exports.updateUser = async (req, res, next) => {
   try {
-    const { username, fullname, email, phone, address } = req.body;
-    const updateUser = await db.user.update(
-      {
-        username,
-        fullname,
-        email,
-        phone,
-        address,
+    const user = await db.user.findOne({
+      where: {
+        id: req.params.id,
       },
-      { where: { id: req.params.id } }
-    );
-    response.success(req, res, updateUser, 201);
+    });
+    if (user) {
+      const { username, fullname, email, phone, address } = req.body;
+      await db.user.update(
+        {
+          username,
+          fullname,
+          email,
+          phone,
+          address,
+        },
+        { where: { id: req.params.id } }
+      );
+      const userUpdated = await db.user.findOne({
+        where: {
+          id: req.params.id,
+        },
+      });
+      response.success(req, res, userUpdated, 200);
+    } else {
+      response.error(req, res, "Not Found", 404);
+    }
   } catch (err) {
     console.error(chalk.red("err-ctr-user-update"), err);
     response.error(req, res, err.message, 500);
@@ -78,19 +92,31 @@ exports.updateUser = async (req, res, next) => {
 
 exports.enableUser = async (req, res, next) => {
   try {
-    const { enable } = req.body;
-    const enableUser = await db.user.update(
-      {
-        enable,
+    const user = await db.user.findOne({
+      where: {
+        id: req.params.id,
       },
-      {
+    });
+    if (user) {
+      const { enable } = req.body;
+      await db.user.update(
+        {
+          enable,
+        },
+        {
+          where: {
+            id: req.params.id,
+          },
+        }
+      );
+      const userUpdated = await db.user.findOne({
         where: {
           id: req.params.id,
         },
-      }
-    );
-    if (enableUser.length > 0) {
-      response.success(req, res, enableUser, 201);
+      });
+      response.success(req, res, userUpdated, 200);
+    } else {
+      response.error(req, res, "Not Found", 404);
     }
   } catch (err) {
     console.error(chalk.red("err-ctr-user-enable"), err);
@@ -100,19 +126,31 @@ exports.enableUser = async (req, res, next) => {
 
 exports.enableAdmin = async (req, res, next) => {
   try {
-    const { admin } = req.body;
-    const enableAdmin = await db.user.update(
-      {
-        admin,
+    const user = await db.user.findOne({
+      where: {
+        id: req.params.id,
       },
-      {
+    });
+    if (user) {
+      const { admin } = req.body;
+      await db.user.update(
+        {
+          admin,
+        },
+        {
+          where: {
+            id: req.params.id,
+          },
+        }
+      );
+      const userUpdated = await db.user.findOne({
         where: {
           id: req.params.id,
         },
-      }
-    );
-    if (enableAdmin.length > 0) {
-      response.success(req, res, enableAdmin, 201);
+      });
+      response.success(req, res, userUpdated, 200);
+    } else {
+      response.error(req, res, "Not Found", 404);
     }
   } catch (err) {
     console.error(chalk.red("err-ctr-user-enable"), err);
@@ -122,12 +160,21 @@ exports.enableAdmin = async (req, res, next) => {
 
 exports.deletedUser = async (req, res, next) => {
   try {
-    const deletedUser = await db.user.destroy({
+    const user = await db.user.findOne({
       where: {
         id: req.params.id,
       },
     });
-    response.success(req, res, deletedUser, 201);
+    if (user) {
+      await db.user.destroy({
+        where: {
+          id: req.params.id,
+        },
+      });
+      response.success(req, res, "User has been deleted", 200);
+    } else {
+      response.error(req, res, "Not Found", 404);
+    }
   } catch (err) {
     console.error(chalk.red("err-ctr-user-deleted"), err);
     response.error(req, res, err.message, 500);

@@ -52,9 +52,9 @@ Proyecto Backend del curso de Desarrollo Web Full Stack de Acámica.
 ### Paso 6: Hacer consultas a la API
 
 - Si no tiene instalado Postman, por favor dirigirse a [este link](https://www.postman.com/downloads/)
-- Abrir Postman, click en `File`, click en `Import`, click en `Import From Link` y pegar lo siguiente `https://www.getpostman.com/collections/c7f3375d229da08a0ed8`
+- Abrir Postman, click en `File`, click en `Import`, click en `Import From Link` y pegar lo siguiente `https://www.getpostman.com/collections/9a92f21a4b944b211278`
 - Hacer las consultas deseadas
 
 ## Documentación de la API
 
-- Para ver la documentación de la API, puede abrir el archivo `delilah_resto_docs.yml` ubicado en el directorio raiz del proyecto o puede ingresar a [este link](https://app.swaggerhub.com/apis/KaribelBT/delilah_resto_documentation/1.0.0) o puese poner en su navegador [este link](http://localhost:3000/api-docs)
+- Para ver la documentación de la API, puede abrir el archivo `swagger.json` ubicado en el directorio raiz del proyecto o puede poner en su navegador [este link](http://localhost:3000/api-docs) despues de iniciar el servidor o [estelink](https://app.swaggerhub.com/apis/migue1223/delilah-resto/1.0.0)

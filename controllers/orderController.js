@@ -22,7 +22,7 @@ exports.listOrder = async (req, res, next) => {
       ],
       attributes: ["id", "created"],
     });
-    response.success(req, res, orders, 201);
+    response.success(req, res, orders, 200);
   } catch (err) {
     console.error(chalk.red("ctr-order-list"), err);
     response.error(req, res, err.message, 500);
@@ -31,15 +31,15 @@ exports.listOrder = async (req, res, next) => {
 
 exports.getOrder = async (req, res, next) => {
   try {
-    const order = await getOrderId(req, res);
-    response.success(req, res, order, 201);
+    const order = await getOrderId(req, res, req.params.id);
+    response.success(req, res, order, 200);
   } catch (err) {
     console.error(chalk.red("ctr-order-get"), err);
-    response.error(req, res, err.message, 501);
+    response.error(req, res, err.message, 500);
   }
 };
 
-exports.getOrderUser = async (req, res, next) => {
+exports.getOrderUserId = async (req, res, next) => {
   try {
     if (req.user.id) {
       const getOrder = await db.order.findAll({
@@ -64,11 +64,15 @@ exports.getOrderUser = async (req, res, next) => {
           },
         ],
       });
-      response.success(req, res, getOrder, 201);
+      if (getOrder.length >= 1) {
+        response.success(req, res, getOrder, 200);
+      } else {
+        response.error(req, res, "Not found", 404);
+      }
     }
   } catch (err) {
     console.error(chalk.red("ctr-order-user-get"), err);
-    response.error(req, res, err.message, 501);
+    response.error(req, res, err.message, 500);
   }
 };
 
@@ -104,12 +108,12 @@ exports.insertOrder = async (req, res, next) => {
         await Promise.all(order_product);
 
         if (order_product) {
-          const result = await getOrderId(req, res);
+          const result = await getOrderId(req, res, order.dataValues.id);
           response.success(req, res, result, 201);
         }
       }
     } else {
-      response.error(req, res, "Conflict, invalid form of payment", 401);
+      response.error(req, res, "Conflict, invalid form of payment", 403);
     }
   } catch (err) {
     console.error(chalk.red("ctr-order-insert"), err);
@@ -117,57 +121,67 @@ exports.insertOrder = async (req, res, next) => {
   }
 };
 
-exports.updatedOrder = async (req, res, next) => {
+exports.updatedOrderStatus = async (req, res, next) => {
   try {
-    if (+req.body.status <= 5) {
-      const updatedOrder = await db.order.update(
-        {
-          StatusId: req.body.status,
+    if (+req.body.status <= 6) {
+      const order = await db.order.findOne({
+        where: {
+          id: req.params.id,
         },
-        {
-          where: {
-            id: req.params.id,
+      });
+      if (order) {
+        await db.order.update(
+          {
+            StatusId: req.body.status,
           },
-        }
-      );
-      if (+updatedOrder[0] <= 1) {
-        const order = await getOrderId(req, res);
-        response.success(req, res, order, 201);
+          {
+            where: {
+              id: req.params.id,
+            },
+          }
+        );
+        const order = await getOrderId(req, res, req.params.id);
+        response.success(req, res, order, 200);
       } else {
-        response.error(req, res, "Not found", 401);
+        response.error(req, res, "Not found", 404);
       }
     } else {
-      response.error(req, res, "Status not found", 401);
+      response.error(req, res, "Status not found", 404);
     }
   } catch (err) {
     console.error(chalk.red("ctr-order-updated-order"), err);
-    response.error(req, res, err.message, 501);
+    response.error(req, res, err.message, 500);
   }
 };
 
 exports.deletedOrder = async (req, res, next) => {
   try {
-    const delOrder = await db.order.destroy({
+    const order = await db.order.findOne({
       where: {
         id: req.params.id,
-        user_id: req.user.id,
       },
     });
-    if (+delOrder === 1) {
-      response.success(req, res, "Order cancelled", 201);
+    if (order) {
+      await db.order.destroy({
+        where: {
+          id: req.params.id,
+          user_id: req.user.id,
+        },
+      });
+      response.success(req, res, "Order cancelled", 200);
     } else {
-      response.error(req, res, "Not fount", 401);
+      response.error(req, res, "Not fount", 404);
     }
   } catch (err) {
     console.error(chalk.red("ctr-order-delete"), err);
-    response.error(req, res, err.message, 501);
+    response.error(req, res, err.message, 500);
   }
 };
 
-async function getOrderId(req, res) {
+async function getOrderId(req, res, id) {
   const getOrder = await db.order.findAll({
     where: {
-      order_id: +req.params.id,
+      order_id: +id,
     },
     attributes: ["id", "created"],
     include: [
@@ -187,5 +201,9 @@ async function getOrderId(req, res) {
       },
     ],
   });
-  return getOrder;
+  if (getOrder.length >= 1) {
+    return getOrder;
+  } else {
+    response.error(req, res, "Not found", 404);
+  }
 }

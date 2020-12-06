@@ -75,7 +75,7 @@ module.exports = (sequelize, DataTypes) => {
       enable: {
         field: "user_enable",
         type: DataTypes.INTEGER,
-        defaultValue: 0,
+        defaultValue: 1,
       },
       createdAt: {
         field: "user_created_at",
