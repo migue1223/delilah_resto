@@ -1,8 +1,10 @@
 "use-strict";
 require("dotenv").config();
 
+const db = require("./db");
 const mysql = require("mysql");
 const config = require("../config/");
+const bcrypt = require("bcrypt");
 
 const dbconf = {
   host: config.mysql.host,
@@ -111,17 +113,35 @@ async function insert(table, data) {
 }
 
 async function updatedDb(table, data) {
-  const result = data.forEach(async (item) => await insert(table, item));
-  console.log(result);
+  data.forEach(async (item) => await insert(table, item));
 }
 
-updatedDb("products", products)
-  .then(() => {
-    updatedDb("payments", payments);
+async function createUser() {
+  const user = {
+    user_username: "admin",
+    user_fullname: "Admin",
+    user_email: "admin@admin.com",
+    user_phone: "1234567890",
+    user_address: "Cl 10 52A 18",
+    user_admin: 1,
+  };
+  const insertUser = await insert("users", user);
+  const auth = {
+    auth_password: await bcrypt.hash("admin123", bcrypt.genSaltSync(10)),
+    user_id: +insertUser.insertId,
+  };
+  await insert("auths", auth);
+}
+
+db.sequelize
+  .sync()
+  .then(async () => {
+    console.log("Conectado al Servidor");
+    await updatedDb("products", products);
+    await updatedDb("payments", payments);
+    await updatedDb("statuses", status);
+    await createUser();
+    await connection.end();
+    await db.sequelize.close();
   })
-  .then(() => {
-    updatedDb("statuses", status);
-  })
-  .then(() => {
-    connection.end();
-  });
+  .catch((error) => console.log(error));

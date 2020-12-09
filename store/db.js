@@ -13,9 +13,6 @@ const sequelize = new Sequelize(
     dialect: "mysql",
     charset: "utf8",
     collate: "utf8_general_ci",
-    query: {
-      raw: true,
-    },
     loggin: true,
     dialectOptions: {
       dateStrings: true,

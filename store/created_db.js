@@ -1,7 +1,6 @@
 "use-strict";
 require("dotenv").config();
 
-const db = require("./db");
 const mysql = require("mysql");
 const config = require("../config/");
 
@@ -29,6 +28,15 @@ function handleCon() {
 
 handleCon();
 
+async function deletedDatabase() {
+  return new Promise((resolve, reject) => {
+    connection.query("DROP DATABASE IF EXISTS delilah_resto", (err, result) => {
+      if (err) return reject(err);
+      resolve(result);
+    });
+  });
+}
+
 async function createdDatabase() {
   return new Promise((resolve, reject) => {
     connection.query(
@@ -41,13 +49,8 @@ async function createdDatabase() {
   });
 }
 
-createdDatabase().then(() => {
-  db.sequelize
-    .sync()
-    .then(async () => {
-      console.log("Conectado al Servidor");
-      await db.sequelize.close();
-      connection.end();
-    })
-    .catch((error) => console.log(error));
+deletedDatabase().then(() => {
+  createdDatabase().then(() => {
+    connection.end();
+  });
 });
