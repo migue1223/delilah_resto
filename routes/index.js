@@ -15,13 +15,12 @@ module.exports = function () {
   router.post("/login", authController.login);
 
   //order
-  router.get("/order", secure("isAdmin"), orderController.listOrder);
+  router.get("/order", secure("isEnable"), orderController.listOrder);
   router.get("/order/:id", secure("isEnable"), orderController.getOrder);
-  router.get("/order-user", secure("isEnable"), orderController.getOrderUserId);
   router.post("/order", secure("isEnable"), orderController.insertOrder);
   router.put(
     "/order/:id/status",
-    secure("isAdmin"),
+    secure("isEnable"),
     orderController.updatedOrderStatus
   );
   router.delete("/order/:id", secure("isAdmin"), orderController.deletedOrder);
@@ -32,16 +31,16 @@ module.exports = function () {
   router.post(
     "/product",
     body("name").not().isEmpty().trim().escape(),
-    body("img").not().isEmpty().trim().escape(),
+    body("img").not().isEmpty().trim(),
     body("price").isInt(),
     secure("isAdmin"),
-    productController.insertProduc
+    productController.insertProduct
   );
   router.put(
     "/product/:id",
     secure("isAdmin"),
     body("name").not().isEmpty().trim().escape(),
-    body("img").not().isEmpty().trim().escape(),
+    body("img").not().isEmpty().trim(),
     body("price").isInt(),
     productController.updatedProduct
   );
@@ -65,7 +64,7 @@ module.exports = function () {
   );
   router.put(
     "/user/:id",
-    secure("update"),
+    secure("isEnable"),
     body("username").not().isEmpty().trim().escape(),
     body("fullname").not().isEmpty().trim().escape(),
     body("email").isEmail(),
@@ -73,8 +72,6 @@ module.exports = function () {
     body("address").not().isEmpty().trim().escape(),
     userController.updateUser
   );
-  router.put("/user/:id/enable", secure("isAdmin"), userController.enableUser);
-  router.put("/user/:id/admin", secure("isEnable"), userController.enableAdmin);
   router.delete("/user/:id", secure("isAdmin"), userController.deletedUser);
 
   return router;

@@ -1,47 +1,28 @@
 "use strict";
 
-const db = require("../store/db");
-const { Op } = require("sequelize");
+const { db } = require("../store/db_delilah");
 const chalk = require("chalk");
 const jwt = require("../auth/");
 const response = require("../network/response");
+const { QueryTypes } = require("sequelize");
+const bcrypt = require("bcrypt");
 
-exports.login = async (req, res, next) => {
+exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    const getUser = await db.user.findOne({
-      where: {
-        [Op.or]: [{ username }, { email: username }],
-      },
-      include: [
-        {
-          model: db.auth,
+    const getUser = await db.query(
+      `SELECT * FROM users WHERE user_username = :username OR user_email = :username`,
+      {
+        replacements: {
+          username,
         },
-      ],
-    });
-    if (!getUser) {
+        type: QueryTypes.SELECT,
+      }
+    );
+    if (!getUser.length) {
       return response.error(req, res, "User or email does not exist", 404);
     }
-    if (getUser.dataValues.enable !== 0) {
-      const auth_password = getUser.Auths[0].dataValues.password;
-      const result = await db.auth.prototype.validPassword(
-        password,
-        auth_password
-      );
-      if (!result) {
-        return response.error(req, res, "Incorrect password", 403);
-      }
-      const token = jwt.sign({
-        id: getUser.dataValues.id,
-        fullname: getUser.dataValues.fullname,
-        email: getUser.dataValues.email,
-        phone: getUser.dataValues.phone,
-        address: getUser.dataValues.address,
-        isAdmin: getUser.dataValues.admin,
-        active: getUser.dataValues.enable,
-      });
-      return response.success(req, res, token, 200);
-    } else {
+    if (getUser[0].user_enable !== 1) {
       return response.error(
         req,
         res,
@@ -49,6 +30,27 @@ exports.login = async (req, res, next) => {
         401
       );
     }
+    const auth = await db.query(`SELECT * FROM auths WHERE user_id = :id`, {
+      replacements: {
+        id: getUser[0].user_id,
+      },
+      type: QueryTypes.SELECT,
+    });
+    const auth_password = auth[0].auth_password;
+    const result = await bcrypt.compareSync(password, auth_password);
+    if (!result) {
+      return response.error(req, res, "Incorrect password", 403);
+    }
+    const token = jwt.sign({
+      id: getUser[0].user_id,
+      fullname: getUser[0].user_fullname,
+      email: getUser[0].user_email,
+      phone: getUser[0].user_phone,
+      address: getUser[0].user_address,
+      isAdmin: getUser[0].user_admin,
+      active: getUser[0].user_enable,
+    });
+    return response.success(req, res, token, 200);
   } catch (err) {
     console.error(chalk.red("auth-ctr"), err);
     response.error(req, res, err.message, 500);

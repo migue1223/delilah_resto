@@ -9,13 +9,6 @@ const helmet = require("helmet");
 const routes = require("./routes");
 const swaggerUi = require("swagger-ui-express");
 
-const db = require("./store/db");
-
-db.sequelize
-  .sync()
-  .then(() => console.log("Conectado al Servidor"))
-  .catch((error) => console.log(error));
-
 const errors = require("./network/errors");
 
 const app = express();

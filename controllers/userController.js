@@ -1,12 +1,30 @@
 "use strict";
 
-const db = require("../store/db");
+const { db } = require("../store/db_delilah");
+const { QueryTypes } = require("sequelize");
 const chalk = require("chalk");
 const response = require("../network/response");
+const bcrypt = require("bcrypt");
 
-exports.listUser = async (req, res, next) => {
+exports.listUser = async (req, res) => {
   try {
-    const users = await db.user.findAll();
+    const data = await db.query("SELECT * FROM `users`", {
+      type: QueryTypes.SELECT,
+    });
+    const users = data.map((d) => {
+      const user = {
+        id: d.user_id,
+        username: d.user_name,
+        fullname: d.user_fullname,
+        email: d.user_email,
+        phone: d.user_phone,
+        address: d.user_address,
+        admin: d.user_admin,
+        enable: d.user_enable,
+        createAt: d.user_created_at,
+      };
+      return user;
+    });
     response.success(req, res, users, 200);
   } catch (err) {
     console.error(chalk.red("err-ctr-user-list"), err);
@@ -14,15 +32,11 @@ exports.listUser = async (req, res, next) => {
   }
 };
 
-exports.getUser = async (req, res, next) => {
+exports.getUser = async (req, res) => {
   try {
-    const user = await db.user.findOne({
-      where: {
-        id: req.params.id,
-      },
-    });
+    const user = await getUserId(+req.params.id);
     if (!user) {
-      response.error(req, res, "", 404);
+      response.error(req, res, "Not found", 404);
     }
     response.success(req, res, user, 200);
   } catch (err) {
@@ -31,152 +45,179 @@ exports.getUser = async (req, res, next) => {
   }
 };
 
-exports.insertUser = async (req, res, next) => {
+exports.insertUser = async (req, res) => {
   try {
-    const { username, fullname, email, phone, address } = req.body;
-    const { password } = req.body;
+    const user = {
+      username: req.body.username,
+      fullname: req.body.fullname,
+      email: req.body.email,
+      phone: req.body.phone,
+      address: req.body.address,
+    };
 
-    const create = await db.user.create({
-      username,
-      fullname,
-      email,
-      phone,
-      address,
-    });
-    if (create.dataValues) {
-      const createAuth = await db.auth.create({
-        password: await db.auth.prototype.generateHash(password),
-        UserId: +create.dataValues.id,
-      });
-      response.success(req, res, create, 201);
+    let { password } = req.body;
+
+    const create = await db.query(
+      "INSERT INTO `users` (user_username, user_fullname, user_email, user_phone, user_address) VALUES (:username, :fullname, :email, :phone, :address)",
+      {
+        replacements: user,
+        type: QueryTypes.INSERT,
+      }
+    );
+    if (create.length > 0) {
+      password = await bcrypt.hash(password, bcrypt.genSaltSync(10));
+      await db.query(
+        "INSERT INTO `auths` (auth_password, user_id) VALUES (:password, :user_id)",
+        {
+          replacements: {
+            password,
+            user_id: create[0],
+          },
+          type: QueryTypes.INSERT,
+        }
+      );
+      const userCreated = await getUserId(+create[0]);
+      response.success(req, res, userCreated, 201);
     }
   } catch (err) {
     console.error(chalk.red("err-ctr-user-insert"), err);
-    response.error(req, res, err.message, 500);
+    response.error(req, res, err.original.sqlMessage, 500);
   }
 };
 
-exports.updateUser = async (req, res, next) => {
+exports.updateUser = async (req, res) => {
   try {
-    const user = await db.user.findOne({
-      where: {
-        id: req.params.id,
-      },
-    });
-    if (user) {
-      const { username, fullname, email, phone, address } = req.body;
-      await db.user.update(
-        {
-          username,
-          fullname,
-          email,
-          phone,
-          address,
-        },
-        { where: { id: req.params.id } }
-      );
-      const userUpdated = await db.user.findOne({
-        where: {
-          id: req.params.id,
-        },
-      });
-      response.success(req, res, userUpdated, 200);
+    const getUser = await getUserId(+req.params.id);
+    if (!getUser) {
+      response.error(req, res, "Not found", 404);
+    }
+
+    if (req.body.username) {
+      if (+req.user.isAdmin === 1) {
+        await db.query(
+          "UPDATE `users` SET user_username = :username, user_fullname = :fullname, user_email = :email, user_phone = :phone, user_address = :address WHERE user_id = :id",
+          {
+            replacements: {
+              id: req.params.id,
+              username: req.body.username,
+              fullname: req.body.fullname,
+              email: req.body.email,
+              phone: req.body.phone,
+              address: req.body.address,
+            },
+          },
+          { type: QueryTypes.UPDATE }
+        );
+        const user = await getUserId(+req.params.id);
+        response.success(req, res, user, 200);
+      } else {
+        if (+req.user.id === +req.params.id) {
+          await db.query(
+            "UPDATE `users` SET user_username = :username, user_fullname = :fullname, user_email = :email, user_phone = :phone, user_address = :address WHERE user_id = :id",
+            {
+              replacements: {
+                id: req.user.id,
+                username: req.body.username,
+                fullname: req.body.fullname,
+                email: req.body.email,
+                phone: req.body.phone,
+                address: req.body.address,
+              },
+            },
+            { type: QueryTypes.UPDATE }
+          );
+          const user = await getUserId(+req.user.id);
+          response.success(req, res, user, 200);
+        } else {
+          response.error(req, res, "You can not do this", 401);
+        }
+      }
     } else {
-      response.error(req, res, "Not Found", 404);
+      if (+req.user.isAdmin === 1) {
+        if (req.query.enable || req.query.admin) {
+          const userQuery = await updateUserQuery(req);
+          response.success(req, res, userQuery, 200);
+        }
+      } else {
+        response.error(req, res, "You can not do this", 401);
+      }
     }
   } catch (err) {
     console.error(chalk.red("err-ctr-user-update"), err);
-    response.error(req, res, err.message, 500);
+    response.error(req, res, err.original.sqlMessage, 500);
   }
 };
 
-exports.enableUser = async (req, res, next) => {
-  try {
-    const user = await db.user.findOne({
-      where: {
-        id: req.params.id,
-      },
-    });
-    if (user) {
-      const { enable } = req.body;
-      await db.user.update(
-        {
-          enable,
-        },
-        {
-          where: {
-            id: req.params.id,
-          },
-        }
-      );
-      const userUpdated = await db.user.findOne({
-        where: {
-          id: req.params.id,
-        },
-      });
-      response.success(req, res, userUpdated, 200);
-    } else {
-      response.error(req, res, "Not Found", 404);
-    }
-  } catch (err) {
-    console.error(chalk.red("err-ctr-user-enable"), err);
-    response.error(req, res, err.message, 500);
+async function updateUserQuery(req) {
+  let replace;
+  let params;
+  if (req.query.enable) {
+    params = "enable";
+    replace = {
+      id: req.params.id,
+      enable: req.query.enable,
+    };
   }
-};
-
-exports.enableAdmin = async (req, res, next) => {
-  try {
-    const user = await db.user.findOne({
-      where: {
-        id: req.params.id,
-      },
-    });
-    if (user) {
-      const { admin } = req.body;
-      await db.user.update(
-        {
-          admin,
-        },
-        {
-          where: {
-            id: req.params.id,
-          },
-        }
-      );
-      const userUpdated = await db.user.findOne({
-        where: {
-          id: req.params.id,
-        },
-      });
-      response.success(req, res, userUpdated, 200);
-    } else {
-      response.error(req, res, "Not Found", 404);
-    }
-  } catch (err) {
-    console.error(chalk.red("err-ctr-user-enable"), err);
-    response.error(req, res, err.message, 500);
+  if (req.query.admin) {
+    params = "admin";
+    replace = {
+      id: req.params.id,
+      admin: req.query.admin,
+    };
   }
-};
+  await db.query(
+    `UPDATE users SET user_${params} = :${params} WHERE user_id = :id`,
+    {
+      replacements: replace,
+    }
+  );
+  const user = await getUserId(req.params.id);
+  return user;
+}
 
-exports.deletedUser = async (req, res, next) => {
+exports.deletedUser = async (req, res) => {
   try {
-    const user = await db.user.findOne({
-      where: {
-        id: req.params.id,
-      },
-    });
-    if (user) {
-      await db.user.destroy({
-        where: {
-          id: req.params.id,
-        },
-      });
-      response.success(req, res, "User has been deleted", 200);
-    } else {
+    const user = await getUserId(+req.params.id);
+    if (!user) {
       response.error(req, res, "Not Found", 404);
     }
+    await db.query(`DELETE FROM users WHERE user_id = :id`, {
+      replacements: {
+        id: req.params.id,
+      },
+      type: QueryTypes.DELETE,
+    });
+    response.success(req, res, "User has been deleted", 200);
   } catch (err) {
     console.error(chalk.red("err-ctr-user-deleted"), err);
-    response.error(req, res, err.message, 500);
+    response.error(req, res, err.original.sqlMessage, 500);
   }
 };
+
+async function getUserId(id) {
+  try {
+    const getUser = await db.query(
+      "SELECT * FROM `users` WHERE user_id = :id",
+      {
+        replacements: {
+          id,
+        },
+        type: QueryTypes.SELECT,
+      }
+    );
+    const user = {
+      id: getUser[0].user_id,
+      username: getUser[0].user_username,
+      fullname: getUser[0].user_fullname,
+      email: getUser[0].user_email,
+      phone: getUser[0].user_phone,
+      address: getUser[0].user_address,
+      admin: getUser[0].user_admin,
+      enable: getUser[0].user_enable,
+      createAt: getUser[0].user_created_at,
+    };
+    return user;
+  } catch (err) {
+    console.error(chalk.red("get-user-id"), err);
+  }
+}

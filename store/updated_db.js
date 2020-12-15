@@ -143,5 +143,6 @@ db.sequelize
     await createUser();
     await connection.end();
     await db.sequelize.close();
+    console.log("Desconectado del Servidor");
   })
   .catch((error) => console.log(error));
