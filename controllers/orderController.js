@@ -28,6 +28,7 @@ exports.listOrder = async (req, res) => {
         products.prod_name,
         products.prod_img_url,
         products.prod_price,
+        users.user_id,
         users.user_username,
         users.user_fullname,
         users.user_email,
@@ -80,6 +81,7 @@ exports.getOrder = async (req, res) => {
         products.prod_name,
         products.prod_img_url,
         products.prod_price,
+        users.user_id
         users.user_username,
         users.user_fullname,
         users.user_email,
@@ -171,27 +173,54 @@ exports.insertOrder = async (req, res) => {
 
 exports.updatedOrderStatus = async (req, res) => {
   try {
-    if (+req.body.status <= 6) {
-      const getOrder = await getOrderId(+req.params.id);
-      if (!getOrder.length) {
-        response.error(req, res, "Not found", 404);
-      }
-
-      await db.query(
-        "UPDATE orders SET status_id = :statusId WHERE order_id = :orderId",
-        {
-          replacements: {
-            statusId: +req.body.status,
-            orderId: +req.params.id,
-          },
-          type: QueryTypes.UPDATE,
-        }
-      );
-      const order = await getOrderId(+req.params.id);
-      response.success(req, res, order, 200);
-    } else {
-      response.error(req, res, "Status not found", 404);
+    let where, replacement;
+    const getOrder = await getOrderId(+req.params.id);
+    if (!getOrder.length) {
+      response.error(req, res, "Not found", 404);
     }
+    if (req.user.isAdmin === 1) {
+      if (+req.query.status <= 6) {
+        where = "order_id = :orderId";
+        replacement = {
+          statusId: +req.query.status,
+          orderId: +req.params.id,
+        };
+      } else {
+        return response.error(req, res, "Status not found", 404);
+      }
+    } else {
+      if (req.user.isAdmin === 0 && req.query.status === 6) {
+        if (+getOrder[0].User.id === +req.user.id) {
+          where = "order_id = :orderId AND user_id = :userId";
+          replacement = {
+            statusId: +req.query.status,
+            orderId: +req.params.id,
+            userId: +req.user.id,
+          };
+        } else {
+          return response.error(
+            req,
+            res,
+            "Unauthorized, contact the administrator",
+            401
+          );
+        }
+      } else {
+        return response.error(
+          req,
+          res,
+          "Unauthorized, contact the administrator",
+          401
+        );
+      }
+    }
+
+    await db.query(`UPDATE orders SET status_id = :statusId WHERE ${where}`, {
+      replacements: replacement,
+      type: QueryTypes.UPDATE,
+    });
+    const order = await getOrderId(+req.params.id);
+    response.success(req, res, order, 200);
   } catch (err) {
     console.error(chalk.red("ctr-order-updated-order"), err);
     response.error(req, res, err.message, 500);
@@ -227,6 +256,7 @@ async function getOrderId(id) {
       products.prod_name,
       products.prod_img_url,
       products.prod_price,
+      users.user_id,
       users.user_username,
       users.user_fullname,
       users.user_email,
@@ -265,6 +295,7 @@ async function reducerOrders(orders) {
       },
     };
     const user = {
+      id: d.user_id,
       fullname: d.user_fullname,
       username: d.user_username,
       email: d.user_email,

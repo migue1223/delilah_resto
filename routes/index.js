@@ -19,7 +19,7 @@ module.exports = function () {
   router.get("/order/:id", secure("isEnable"), orderController.getOrder);
   router.post("/order", secure("isEnable"), orderController.insertOrder);
   router.put(
-    "/order/:id/status",
+    "/order/:id",
     secure("isEnable"),
     orderController.updatedOrderStatus
   );

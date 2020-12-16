@@ -14,7 +14,7 @@ exports.listUser = async (req, res) => {
     const users = data.map((d) => {
       const user = {
         id: d.user_id,
-        username: d.user_name,
+        username: d.user_username,
         fullname: d.user_fullname,
         email: d.user_email,
         phone: d.user_phone,
@@ -110,6 +110,7 @@ exports.updateUser = async (req, res) => {
         );
         const user = await getUserId(+req.params.id);
         response.success(req, res, user, 200);
+        await comparePassword(+req.params.id, req.body.password);
       } else {
         if (+req.user.id === +req.params.id) {
           await db.query(
@@ -128,6 +129,7 @@ exports.updateUser = async (req, res) => {
           );
           const user = await getUserId(+req.user.id);
           response.success(req, res, user, 200);
+          await comparePassword(+req.user.id, req.body.password);
         } else {
           response.error(req, res, "You can not do this", 401);
         }
@@ -219,5 +221,31 @@ async function getUserId(id) {
     return user;
   } catch (err) {
     console.error(chalk.red("get-user-id"), err);
+  }
+}
+
+async function comparePassword(id, password) {
+  const user = await db.query(
+    "SELECT auths.auth_password FROM users INNER JOIN auths ON users.user_id = auths.user_id WHERE users.user_id = :id",
+    {
+      replacements: {
+        id: +id,
+      },
+      type: QueryTypes.SELECT,
+    }
+  );
+  const isEqual = await bcrypt.compareSync(password, user[0].auth_password);
+  if (!isEqual) {
+    const hashPass = await bcrypt.hash(password, bcrypt.genSaltSync(10))
+    await db.query(
+      "UPDATE auths SET auth_password = :password WHERE user_id = :id",
+      {
+        replacements: {
+          password: hashPass,
+          id: +id,
+        },
+        type: QueryTypes.UPDATE,
+      }
+    );
   }
 }
