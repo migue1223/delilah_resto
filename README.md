@@ -17,9 +17,9 @@ Backend Project of the Full Stack Web Development course by Acámica.
 
 - Clone repository from [next link](https://github.com/migue1223/delilah_resto.git)
 
-- Open terminal and run
-- mkdir delilah_resto
-- `git clone https://github.com/KaribelBT/delilah_resto.git`
+- Open terminal and run:
+mkdir delilah_resto
+`git clone https://github.com/migue1223/delilah_resto.git`
 
 ### Step 2: Install dependencies
 
