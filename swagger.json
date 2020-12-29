@@ -24,7 +24,7 @@
   ],
   "schemes": ["http"],
   "paths": {
-    "/user": {
+    "/users": {
       "get": {
         "security": [
           {
@@ -81,7 +81,7 @@
         }
       }
     },
-    "/user/{id}": {
+    "/users/{id}": {
       "get": {
         "security": [
           {
@@ -238,7 +238,7 @@
         }
       }
     },
-    "/user/{id}?enable=0": {
+    "/users/{id}?enable=0": {
       "put": {
         "security": [
           {
@@ -284,7 +284,7 @@
         }
       }
     },
-    "/user/{id}?admin=0": {
+    "/users/{id}?admin=0": {
       "put": {
         "security": [
           {
@@ -330,7 +330,7 @@
         }
       }
     },
-    "/product": {
+    "/products": {
       "post": {
         "security": [
           {
@@ -397,7 +397,7 @@
         }
       }
     },
-    "/product/{id}": {
+    "/products/{id}": {
       "get": {
         "security": [
           {
@@ -522,7 +522,7 @@
         }
       }
     },
-    "/order": {
+    "/orders": {
       "post": {
         "security": [
           {
@@ -589,7 +589,7 @@
         }
       }
     },
-    "/order/{id}": {
+    "/orders/{id}": {
       "get": {
         "security": [
           {
@@ -666,7 +666,7 @@
         }
       }
     },
-    "/order/{id}?status=0": {
+    "/orders/{id}?status=0": {
       "put": {
         "security": [
           {
