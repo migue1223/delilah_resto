@@ -18,7 +18,7 @@ Backend Project of the Full Stack Web Development course by Acámica.
 - Clone repository from [next link](https://github.com/migue1223/delilah_resto.git)
 
 - Open terminal and run:
-mkdir delilah_resto
+`mkdir delilah_resto`
 `git clone https://github.com/migue1223/delilah_resto.git`
 
 ### Step 2: Install dependencies
@@ -55,7 +55,7 @@ mkdir delilah_resto
 - If you do not have Postman installed, please go to [this link](https://www.postman.com/downloads/)
 - Open Postman, click on `File`, click on `Import`, click on `Import From Link` and paste the following `https://www.getpostman.com/collections/9a92f21a4b944b211278`
 - Make the desired queries
-- Default user: user: admin, password: admin123
+- Default user: `user: admin`, `password: admin123`
 
 ## API documentation
 
