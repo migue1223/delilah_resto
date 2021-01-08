@@ -20,7 +20,7 @@ module.exports = function () {
   router.post("/orders", secure("isEnable"), orderController.insertOrder);
   router.put(
     "/orders/:id",
-    secure("isEnable"),
+    secure("isAdmin"),
     orderController.updatedOrderStatus
   );
   router.delete("/orders/:id", secure("isAdmin"), orderController.deletedOrder);
